@@ -17,7 +17,7 @@ export async function submitRSVP(input: RSVPInput) {
     return { ok: false, error: 'Please choose a date and preferred time.' }
   }
   const sql = getSql()
-  await sql`INSERT INTO anniversary_rsvps (name, email, attendance, plus_one, message, preferred_date, preferred_time) VALUES ('Story guest', 'not-provided@anniversary.local', 'yes', false, NULL, ${preferredDate}, ${preferredTime})`
+  await sql`INSERT INTO anniversary_rsvps (preferred_date, preferred_time) VALUES ( ${preferredDate}, ${preferredTime})`
   if (process.env.RESEND_API_KEY && process.env.ANNIVERSARY_NOTIFICATION_EMAIL) {
     await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: 'Anniversary RSVP <onboarding@resend.dev>', to: [process.env.ANNIVERSARY_NOTIFICATION_EMAIL], subject: 'New anniversary date preference', text: `Preferred date: ${preferredDate}\nPreferred time: ${preferredTime}` }) }).catch(() => undefined)
   }
@@ -27,5 +27,5 @@ export async function submitRSVP(input: RSVPInput) {
 
 export async function getRSVPs() {
   const sql = getSql()
-  return sql`SELECT id, name, email, preferred_date, preferred_time, created_at FROM anniversary_rsvps ORDER BY created_at DESC`
+  return sql`SELECT id, preferred_date, preferred_time, created_at FROM anniversary_rsvps ORDER BY created_at DESC`
 }
